@@ -1,6 +1,7 @@
 using System;
-using System.Windows.Data;
 using System.Globalization;
+using System.Windows.Data;
+using Bogdan_Monitor.Views; 
 
 namespace Bogdan_Monitor.Converters
 {
@@ -8,15 +9,14 @@ namespace Bogdan_Monitor.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is double free)
+            // Добавлена проверка на null для value и parameter, а также для diskInfo
+            if (value is double free && parameter is MainView.DiskInfo diskInfo && diskInfo != null && diskInfo.TotalGB > 0)
             {
-                var diskInfo = parameter as dynamic;
-                if (diskInfo != null && diskInfo.TotalGB > 0)
-                {
-                    return 100 - (free / diskInfo.TotalGB * 100);
-                }
+                // Расчет использованного пространства в процентах
+                double usedPercent = (diskInfo.UsedGB / diskInfo.TotalGB) * 100;
+                return usedPercent;
             }
-            return 0;
+            return 0; // Возвращаем 0, если что-то пошло не так
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

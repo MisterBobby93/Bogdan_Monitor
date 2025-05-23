@@ -47,13 +47,12 @@ namespace Bogdan_Monitor.Views
             timer.Start();
         }
 
-        private void Timer_Tick(object sender, EventArgs e)
+        private void Timer_Tick(object? sender, EventArgs? e) // Убедитесь, что добавлены '?'
         {
             //CPU Usage
             CpuValue = counter.PerformanceCPU.NextValue();
             cpuTimeLabel.Content = counter.TimeCPU.NextValue();
-            osCpuUsageLabel.Content = counter.OS_CPU.NextValue();
-            userCpuUsageLabel.Content = counter.UserCPU.NextValue();
+
 
             //RAM Usage
             ramLabel.Content = counter.GetFreeRAMInPercent();
@@ -79,10 +78,11 @@ namespace Bogdan_Monitor.Views
             UpdateDiskInfo();
         }
 
+        // Класс для привязки данных к дискам
         public class DiskInfo
         {
-            public string DiskName { get; set; }
-            public string DiskType { get; set; }
+            public string DiskName { get; set; } = string.Empty; // Инициализация
+            public string DiskType { get; set; } = string.Empty; // Инициализация
             public double UsedGB { get; set; }
             public double FreeGB { get; set; }
             public double TotalGB { get; set; }
@@ -102,9 +102,11 @@ namespace Bogdan_Monitor.Views
                     double used = total - free;
                     double percent = total > 0 ? (used / total) * 100 : 0;
 
+                    // Определение типа диска (SSD/HDD)
                     string type = "HDD";
                     try
                     {
+                        // Windows 8+ API, если доступно
                         var query = $"SELECT MediaType FROM Win32_DiskDrive WHERE DeviceID LIKE '%{drive.Name[0]}%'";
                         using (var searcher = new System.Management.ManagementObjectSearcher(query))
                         {
@@ -115,7 +117,7 @@ namespace Bogdan_Monitor.Views
                             }
                         }
                     }
-                    catch { }
+                    catch { /* Если не удалось определить, оставить HDD */ }
 
                     diskInfoList.Add(new DiskInfo
                     {
@@ -129,6 +131,7 @@ namespace Bogdan_Monitor.Views
                 }
                 catch
                 {
+                    // Если диск не готов или ошибка доступа
                     diskInfoList.Add(new DiskInfo
                     {
                         DiskName = disk,

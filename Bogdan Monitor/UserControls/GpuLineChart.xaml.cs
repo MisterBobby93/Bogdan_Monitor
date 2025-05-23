@@ -16,7 +16,6 @@ namespace Bogdan_Monitor.UserControls
         private double _axisMax;
         private double _axisMin;
 
-        // Переместить сюда!
         public Counter CounterInstance { get; set; } = new Counter();
 
         public GpuLineChart()
@@ -85,6 +84,7 @@ namespace Bogdan_Monitor.UserControls
             var now = DateTime.Now;
             double value = 0;
 
+            // Получаем Video Encode из CounterInstance
             var encode = CounterInstance.GetGpuVideoEncode();
             if (encode.HasValue)
                 value = encode.Value;

@@ -21,13 +21,15 @@ namespace Bogdan_Monitor
         public PerformanceCounter? SentBytesPerSecond { get; set; }
         public PerformanceCounter? ReceivedBytesPerSecond { get; set; }
 
+        // GPU
         public double? GpuVideoEncode { get; private set; }
         public double? GpuMemoryUsed { get; private set; }
         public double? GpuMemoryTotal { get; private set; }
         public double? GpuTemperature { get; private set; }
 
+        // Для динамического учета всех дисков
         public Dictionary<string, PerformanceCounter> DiskFreeSpaceCounters { get; private set; } = new();
-        public Dictionary<string, PerformanceCounter> DiskLoadCounters { get; private set; } = new(); 
+        public Dictionary<string, PerformanceCounter> DiskLoadCounters { get; private set; } = new();
 
         public List<string> LogicalDisks { get; private set; } = new();
 
@@ -36,9 +38,11 @@ namespace Bogdan_Monitor
             var category = new PerformanceCounterCategory("Network Interface");
             var instances = category.GetInstanceNames();
 
+            // Выберите первый доступный адаптер или верните null
             return instances.FirstOrDefault();
         }
 
+        // LibreHardwareMonitor
         private Computer _computer;
 
         public Counter()
@@ -67,15 +71,17 @@ namespace Bogdan_Monitor
                 ReceivedBytesPerSecond = null;
             }
 
+            // Инициализация LibreHardwareMonitor
             _computer = new Computer
             {
                 IsGpuEnabled = true
             };
             _computer.Open();
 
+            // Кроссплатформенное определение всех логических дисков (без System.Management)
             LogicalDisks.Clear();
             DiskFreeSpaceCounters.Clear();
-            DiskLoadCounters.Clear(); 
+            DiskLoadCounters.Clear(); // добавлено
             foreach (var drive in DriveInfo.GetDrives())
             {
                 if (drive.DriveType == DriveType.Fixed)
@@ -98,6 +104,7 @@ namespace Bogdan_Monitor
 
         public void UpdateGpuInfo()
         {
+            // Используем LibreHardwareMonitor для получения информации о GPU
             GpuVideoEncode = null;
             GpuMemoryUsed = null;
             GpuMemoryTotal = null;
@@ -112,23 +119,27 @@ namespace Bogdan_Monitor
                     hardware.Update();
                     foreach (var sensor in hardware.Sensors)
                     {
+                        // Температура
                         if (sensor.SensorType == SensorType.Temperature && GpuTemperature == null)
                         {
                             GpuTemperature = sensor.Value;
                         }
+                        // Использование Video Encode (именно Video Encode, а не Core)
                         if (sensor.SensorType == SensorType.Load &&
                             sensor.Name.Contains("Video Encode") &&
                             GpuVideoEncode == null)
                         {
                             GpuVideoEncode = sensor.Value;
                         }
+                        // Используемая видеопамять
                         if (sensor.SensorType == SensorType.SmallData && sensor.Name.Contains("Memory Used"))
                         {
-                            GpuMemoryUsed = sensor.Value.HasValue ? Math.Round(sensor.Value.Value / 1024, 2) : (double?)null; 
+                            GpuMemoryUsed = sensor.Value.HasValue ? Math.Round(sensor.Value.Value / 1024, 2) : (double?)null; // MB -> GB
                         }
+                        // Всего видеопамяти
                         if (sensor.SensorType == SensorType.SmallData && sensor.Name.Contains("Memory Total"))
                         {
-                            GpuMemoryTotal = sensor.Value.HasValue ? Math.Round(sensor.Value.Value / 1024, 2) : (double?)null; 
+                            GpuMemoryTotal = sensor.Value.HasValue ? Math.Round(sensor.Value.Value / 1024, 2) : (double?)null; // MB -> GB
                         }
                     }
                 }
@@ -148,6 +159,7 @@ namespace Bogdan_Monitor
             return 32.518 - (FreeRAM.NextValue() / 1000);
         }
 
+        // Получить % свободного места по диску (0..1)
         public double GetFreeSpaceDisk(string disk)
         {
             if (DiskFreeSpaceCounters.TryGetValue(disk, out var counter))
@@ -157,6 +169,7 @@ namespace Bogdan_Monitor
             return 0;
         }
 
+        // Получить % свободного места для всех дисков (0..1)
         public Dictionary<string, double> GetAllDisksFreeSpace()
         {
             var result = new Dictionary<string, double>();
@@ -167,6 +180,7 @@ namespace Bogdan_Monitor
             return result;
         }
 
+        // Получить % свободного места для отображения gauge (0..100)
         public double GetFreeSpaceDiskGauge(string disk)
         {
             if (DiskFreeSpaceCounters.TryGetValue(disk, out var counter))
@@ -176,30 +190,32 @@ namespace Bogdan_Monitor
             return 0;
         }
 
-        public double? GetGpuVideoEncode() 
+        // Вспомогательные методы для получения GPU информации
+        public double? GetGpuVideoEncode() // %
         {
             UpdateGpuInfo();
             return GpuVideoEncode;
         }
 
-        public double? GetGpuMemoryUsed() 
+        public double? GetGpuMemoryUsed() // GB
         {
             UpdateGpuInfo();
             return GpuMemoryUsed;
         }
 
-        public double? GetGpuMemoryTotal() 
+        public double? GetGpuMemoryTotal() // GB
         {
             UpdateGpuInfo();
             return GpuMemoryTotal;
         }
 
-        public double? GetGpuTemperature() 
+        public double? GetGpuTemperature() // °C
         {
             UpdateGpuInfo();
             return GpuTemperature;
         }
 
+        // Получить загрузку диска (0..100)
         public double GetDiskLoad(string disk)
         {
             if (DiskLoadCounters.TryGetValue(disk, out var counter))
@@ -209,6 +225,7 @@ namespace Bogdan_Monitor
             return 0;
         }
 
+        // Получить загрузку всех дисков
         public Dictionary<string, double> GetAllDisksLoad()
         {
             var result = new Dictionary<string, double>();

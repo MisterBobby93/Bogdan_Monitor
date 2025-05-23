@@ -5,9 +5,7 @@ using System.Windows.Media;
 
 namespace Bogdan_Monitor.UserControls
 {
-    /// <summary>
-    /// Interaction logic for Gauge.xaml
-    /// </summary>
+
     
     public partial class Gauge : UserControl
     {

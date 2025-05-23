@@ -8,29 +8,39 @@ using System.Diagnostics;
 
 namespace Bogdan_Monitor.UserControls
 {
+    /// <summary>
+    /// Interaction logic for LineChart.xaml
+    /// </summary>
     public partial class LineChart : UserControl, INotifyPropertyChanged
     {
         private double _axisMax;
         private double _axisMin;
+        // private double _trend; // Удалите эту строку
         public LineChart()
         {
             InitializeComponent();
 
             var mapper = Mappers.Xy<MeasureModel>()
-               .X(model => model.DateTime.Ticks)   
+               .X(model => model.DateTime.Ticks)   //use DateTime.Ticks as X
                .Y(model => model.Value);
 
             Charting.For<MeasureModel>(mapper);
 
+            //the values property will store our values array
             ChartValues = new ChartValues<MeasureModel>();
 
+            //lets set how to display the X Labels
             DateTimeFormatter = value => new DateTime((long)value).ToString("mm:ss");
 
+            //AxisStep forces the distance between each separator in the X axis
             AxisStep = TimeSpan.FromSeconds(1).Ticks;
+            //AxisUnit forces lets the axis know that we are plotting seconds
+            //this is not always necessary, but it can prevent wrong labeling
             AxisUnit = TimeSpan.TicksPerSecond;
 
             SetAxisLimits(DateTime.Now);
 
+            //The next code simulates data changes every 300 ms
 
             IsReading = false;
 
@@ -73,8 +83,8 @@ namespace Bogdan_Monitor.UserControls
 
         private void SetAxisLimits(DateTime now)
         {
-            AxisMax = now.Ticks + TimeSpan.FromSeconds(1).Ticks; 
-            AxisMin = now.Ticks - TimeSpan.FromSeconds(30).Ticks;
+            AxisMax = now.Ticks + TimeSpan.FromSeconds(1).Ticks; // lets force the axis to be 1 second ahead
+            AxisMin = now.Ticks - TimeSpan.FromSeconds(30).Ticks; // and 8 seconds behind
         }
 
         void timer_Tick(object? sender, EventArgs e)

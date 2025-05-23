@@ -8,8 +8,37 @@
         xmlns:linechart="clr-namespace:Bogdan_Monitor.UserControls"
         mc:Ignorable="d"
         Height="700" Width="700">
-    
-    <Grid>
+    <UserControl.Resources>
+        <!-- Перенесённый стиль RoundedProgressBar -->
+        <Style x:Key="RoundedProgressBar" TargetType="ProgressBar">
+            <Setter Property="Height" Value="10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid x:Name="Root" Height="{TemplateBinding Height}">
+                            <Border x:Name="PART_Track" 
+                                    Background="{TemplateBinding Background}" 
+                                    CornerRadius="5"/>
+                            <Border x:Name="PART_Indicator" 
+                                    Background="{TemplateBinding Foreground}" 
+                                    CornerRadius="5"
+                                    HorizontalAlignment="Left"
+                                    Width="0"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsIndeterminate" Value="True">
+                                <Setter TargetName="PART_Indicator" Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                            <Trigger Property="Orientation" Value="Vertical">
+                                <!-- Для вертикального ProgressBar можно добавить обработку -->
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid Background="#181a23">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
@@ -20,188 +49,93 @@
         </Grid.ColumnDefinitions>
 
         <!-- CPU Info -->
-        <Border Style="{StaticResource mainBorder}" Grid.Row="0" Grid.Column="0" Margin="10">
+        <Border Style="{StaticResource mainBorder}" Grid.Row="0" Grid.Column="0" Margin="14" Background="#23243a" CornerRadius="16" Padding="18">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="200"/>
-                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Новый стиль: крупный заголовок и процент -->
-                <StackPanel Grid.Row="0" Grid.ColumnSpan="4" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="20,10,0,0">
-                    <TextBlock Text="CPU" FontSize="36" FontWeight="Bold" Foreground="#fcfafa" VerticalAlignment="Bottom"/>
-                    <TextBlock x:Name="cpuLabel" Margin="20,0,0,0"
-                               FontSize="48" FontWeight="Bold"
-                               Foreground="#FF0A7AF2"
-                               Text="{Binding Text, ElementName=cpuLabel, Mode=OneWay}"/>
-                </StackPanel>
-                
-
+                <!-- Заголовок и процент -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Icon:PackIconMaterial Kind="Chip" Width="28" Height="28" Foreground="#2889fc" Margin="0,0,8,0"/>
+                        <TextBlock Text="CPU" FontSize="22" FontWeight="Bold" Foreground="#fcfafa" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock x:Name="cpuLabel" Grid.Column="1"
+                               FontSize="36" FontWeight="Bold" Foreground="#2889fc"
+                               VerticalAlignment="Center" HorizontalAlignment="Right"
+                               Text="0%"/>
+                </Grid>
                 <!-- График -->
-                <linechart:LineChart x:Name="cpuChart" Grid.Row="1" Grid.ColumnSpan="4" Margin="0,8,0,8"/>
-
-                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="Processor Time"
-                           FontSize="12" FontWeight="SemiBold"
-                           VerticalAlignment="Bottom" 
-                           Margin="5 0 0 0" 
-                           Foreground="#464a63"/>
-                <TextBlock Grid.Row="2" Grid.Column="2" Text="OS"
-                           FontSize="12" FontWeight="SemiBold"
-                           VerticalAlignment="Bottom" 
-                           Margin="5 0 0 0" 
-                           Foreground="#464a63"/>
-                <TextBlock Grid.Row="2" Grid.Column="3" Text="User"
-                           FontSize="12" FontWeight="SemiBold"
-                           VerticalAlignment="Bottom" 
-                           Margin="5 0 0 0" 
-                           Foreground="#464a63"/>
-
-                <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
-                    <Label x:Name="cpuTimeLabel" Foreground="#fcfafa" FontSize="14"
-                           FontWeight="SemiBold"
-                           VerticalContentAlignment="Center"      
-                           Padding="0"
-                           ContentStringFormat="{}{0:F1}" 
-                           HorizontalAlignment="Left" VerticalAlignment="Center" 
-                           HorizontalContentAlignment="Left"
-                           Margin="5 0 0 0" />
-
-                    <TextBlock Text="%" Foreground="#fcfafa" FontSize="14"
-                               VerticalAlignment="Center" FontWeight="SemiBold"
-                               HorizontalAlignment="Right" Padding="0" Margin="5 1 0 0"/>
+                <linechart:LineChart x:Name="cpuChart" Grid.Row="1" Grid.RowSpan="2" Margin="0,18,0,8" Height="90"/>
+                <!-- Processor Time -->
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,8,0,0">
+                    <TextBlock Text="Processor Time:" FontSize="13" Foreground="#a0a0a0" Margin="0,0,6,0"/>
+                    <Label x:Name="cpuTimeLabel" Foreground="#fcfafa" FontSize="13" FontWeight="SemiBold"
+                           Padding="0" ContentStringFormat="{}{0:F0}" VerticalContentAlignment="Center"/>
+                    <TextBlock Text="%" Foreground="#fcfafa" FontSize="13" FontWeight="SemiBold" Margin="3,0,0,0"/>
                 </StackPanel>
-
-                <StackPanel Grid.Row="3" Grid.Column="2" Orientation="Horizontal">
-                    <Label x:Name="osCpuUsageLabel" Foreground="#fcfafa" FontSize="14"
-                           FontWeight="SemiBold"
-                           VerticalContentAlignment="Center"      
-                           Padding="0"
-                           ContentStringFormat="{}{0:F1}" 
-                           HorizontalAlignment="Left" VerticalAlignment="Center" 
-                           HorizontalContentAlignment="Left"
-                           Margin="5 0 0 0" />
-
-                    <TextBlock Text="%" Foreground="#fcfafa" FontSize="14"
-                               VerticalAlignment="Center" FontWeight="SemiBold"
-                               HorizontalAlignment="Right" Padding="0" Margin="5 1 0 0"/>
-                </StackPanel>
-
-                <StackPanel Grid.Row="3" Grid.Column="3" Orientation="Horizontal">
-                    <Label x:Name="userCpuUsageLabel" Foreground="#fcfafa" FontSize="14"
-                           FontWeight="SemiBold"
-                           VerticalContentAlignment="Center"      
-                           Padding="0"
-                           ContentStringFormat="{}{0:F1}" 
-                           HorizontalAlignment="Left" VerticalAlignment="Center" 
-                           HorizontalContentAlignment="Left"
-                           Margin="5 0 0 0" />
-
-                    <TextBlock Text="%" Foreground="#fcfafa" FontSize="14"
-                               VerticalAlignment="Center" FontWeight="SemiBold"
-                               HorizontalAlignment="Right" Padding="0" Margin="5 1 0 0"/>
-                </StackPanel>               
             </Grid>
         </Border>
 
         <!-- GPU Info -->
-        <Border Style="{StaticResource mainBorder}" Grid.Row="0" Grid.Column="1" Margin="10">
+        <Border Style="{StaticResource mainBorder}" Grid.Row="0" Grid.Column="1" Margin="14" Background="#23243a" CornerRadius="16" Padding="18">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="200"/>
-                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Новый стиль: крупный заголовок и процент -->
-                <StackPanel Grid.Row="0" Grid.ColumnSpan="4" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="20,10,0,0">
-                    <TextBlock Text="GPU" FontSize="36" FontWeight="Bold" Foreground="#fcfafa" VerticalAlignment="Bottom"/>
-                    <TextBlock x:Name="gpuLoadLabel" Margin="20,0,0,0"
-                               FontSize="48" FontWeight="Bold"
-                               Foreground="#FFFC8803"
-                               Text="{Binding Text, ElementName=gpuLoadLabel, Mode=OneWay}"/>
-                </StackPanel>
-
+                <!-- Заголовок и процент -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Icon:PackIconMaterial Kind="MonitorDashboard" Width="28" Height="28" Foreground="#00c853" Margin="0,0,8,0"/>
+                        <TextBlock Text="GPU" FontSize="22" FontWeight="Bold" Foreground="#fcfafa" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock x:Name="gpuLoadLabel" Grid.Column="1"
+                               FontSize="36" FontWeight="Bold" Foreground="#00c853"
+                               VerticalAlignment="Center" HorizontalAlignment="Right"
+                               Text="0%"/>
+                </Grid>
                 <!-- График -->
-                <linechart:GpuLineChart x:Name="gpuChart" Grid.Row="1" Grid.ColumnSpan="4" Margin="0,8,0,8" Background="Transparent"/>
-                <!-- подписи под графиком -->
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Temp"
-                           FontSize="12" FontWeight="SemiBold"
-                           VerticalAlignment="Bottom" 
-                           Margin="5 0 0 0" 
-                           Foreground="#464a63"/>
-                <TextBlock Grid.Row="2" Grid.Column="1" Text="Used"
-                           FontSize="12" FontWeight="SemiBold"
-                           VerticalAlignment="Bottom" 
-                           Margin="5 0 0 0" 
-                           Foreground="#464a63"/>
-                <TextBlock Grid.Row="2" Grid.Column="2" Text="Total"
-                           FontSize="12" FontWeight="SemiBold"
-                           VerticalAlignment="Bottom" 
-                           Margin="5 0 0 0" 
-                           Foreground="#464a63"/>
-
-                <!-- Temp -->
-                <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
-                    <Label x:Name="gpuTempLabel" Foreground="#fcfafa" FontSize="14"
-                           FontWeight="SemiBold"
-                           VerticalContentAlignment="Center"
-                           Padding="0"
-                           ContentStringFormat="{}{0:F0}"
-                           HorizontalAlignment="Left" VerticalAlignment="Center"
-                           HorizontalContentAlignment="Left"
-                           Margin="0 0 0 0" />
-                    <TextBlock Text="°C" Foreground="#fcfafa" FontSize="14"
-                               VerticalAlignment="Center" FontWeight="SemiBold"
-                               HorizontalAlignment="Right" Padding="0" Margin="5 1 0 0"/>
-                </StackPanel>
-                <!-- Used -->
-                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
-                    <Label x:Name="gpuRamUsedLabel" Foreground="#fcfafa" FontSize="14"
-                           FontWeight="SemiBold"
-                           VerticalContentAlignment="Center"
-                           Padding="0"
-                           ContentStringFormat="{}{0:F1}"
-                           HorizontalAlignment="Left" VerticalAlignment="Center"
-                           HorizontalContentAlignment="Left"
-                           Margin="0 0 0 0" />
-                    <TextBlock Text="GB" Foreground="#fcfafa" FontSize="14"
-                               VerticalAlignment="Center" FontWeight="SemiBold"
-                               HorizontalAlignment="Right" Padding="0" Margin="5 1 0 0"/>
-                </StackPanel>
-                <!-- Total -->
-                <StackPanel Grid.Row="3" Grid.Column="2" Orientation="Horizontal">
-                    <Label x:Name="gpuRamTotalLabel" Foreground="#fcfafa" FontSize="14"
-                           FontWeight="SemiBold"
-                           VerticalContentAlignment="Center"
-                           Padding="0"
-                           ContentStringFormat="{}{0:F1}"
-                           HorizontalAlignment="Left" VerticalAlignment="Center"
-                           HorizontalContentAlignment="Left"
-                           Margin="0 0 0 0" />
-                    <TextBlock Text="GB" Foreground="#fcfafa" FontSize="14"
-                               VerticalAlignment="Center" FontWeight="SemiBold"
-                               HorizontalAlignment="Right" Padding="0" Margin="5 1 0 0"/>
+                <linechart:GpuLineChart x:Name="gpuChart" Grid.Row="1" Grid.RowSpan="2" Margin="0,18,0,8" Height="90"/>
+                <!-- Temp, Used, Total -->
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,8,0,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,24,0">
+                        <TextBlock Text="Temp:" FontSize="13" Foreground="#a0a0a0" Margin="0,0,4,0"/>
+                        <Label x:Name="gpuTempLabel" Foreground="#fcfafa" FontSize="13" FontWeight="SemiBold"
+                               Padding="0" ContentStringFormat="{}{0:F0}" VerticalContentAlignment="Center"/>
+                        <TextBlock Text="°C" Foreground="#fcfafa" FontSize="13" FontWeight="SemiBold" Margin="3,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,24,0">
+                        <TextBlock Text="Used:" FontSize="13" Foreground="#a0a0a0" Margin="0,0,4,0"/>
+                        <Label x:Name="gpuRamUsedLabel" Foreground="#fcfafa" FontSize="13" FontWeight="SemiBold"
+                               Padding="0" ContentStringFormat="{}{0:F1}" VerticalContentAlignment="Center"/>
+                        <TextBlock Text="GB" Foreground="#fcfafa" FontSize="13" FontWeight="SemiBold" Margin="3,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Total:" FontSize="13" Foreground="#a0a0a0" Margin="0,0,4,0"/>
+                        <Label x:Name="gpuRamTotalLabel" Foreground="#fcfafa" FontSize="13" FontWeight="SemiBold"
+                               Padding="0" ContentStringFormat="{}{0:F1}" VerticalContentAlignment="Center"/>
+                        <TextBlock Text="GB" Foreground="#fcfafa" FontSize="13" FontWeight="SemiBold" Margin="3,0,0,0"/>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- Disk Usage -->
-        <Border Style="{StaticResource mainBorder}" Grid.Row="1" Grid.Column="0" Margin="10">
+        <Border Style="{StaticResource mainBorder}" Grid.Row="1" Grid.Column="0" Margin="14" Background="#23243a" CornerRadius="16" Padding="18">
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <ScrollViewer.Resources>
                     <Style TargetType="ScrollBar">
@@ -225,34 +159,6 @@
                             </Setter.Value>
                         </Setter>
                     </Style>
-                    <!-- Новый стиль для ProgressBar с закруглениями -->
-                    <Style x:Key="RoundedProgressBar" TargetType="ProgressBar">
-                        <Setter Property="Height" Value="10"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ProgressBar">
-                                    <Grid x:Name="Root" Height="{TemplateBinding Height}">
-                                        <Border x:Name="PART_Track" 
-                                                Background="{TemplateBinding Background}" 
-                                                CornerRadius="5"/>
-                                        <Border x:Name="PART_Indicator" 
-                                                Background="{TemplateBinding Foreground}" 
-                                                CornerRadius="5"
-                                                HorizontalAlignment="Left"
-                                                Width="0"/>
-                                    </Grid>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsIndeterminate" Value="True">
-                                            <Setter TargetName="PART_Indicator" Property="Visibility" Value="Collapsed"/>
-                                        </Trigger>
-                                        <Trigger Property="Orientation" Value="Vertical">
-                                            <!-- Для вертикального ProgressBar можно добавить обработку -->
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
                 </ScrollViewer.Resources>
                 <ItemsControl x:Name="diskPanel" Margin="0">
                     <ItemsControl.ItemsPanel>
@@ -262,14 +168,8 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border CornerRadius="14" BorderThickness="0" Margin="10" Padding="16"
-                                    Background="#26283a">
-                                <!-- Если нужен эффект тени, раскомментируйте строку ниже: -->
-                                <!--
-                                <Border.Effect>
-                                    <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.3" Color="#FF000000"/>
-                                </Border.Effect>
-                                -->
+                            <Border CornerRadius="10" BorderThickness="0" Margin="10" Padding="15"
+                                    Background="#26283a"> 
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -278,38 +178,18 @@
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-
-                                    <!-- Верх: иконка, имя, тип, процент -->
-                                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="💾" FontSize="28" Margin="0 0 10 0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="{Binding DiskName}" FontSize="20" FontWeight="Bold"
-                                                   Foreground="#fcfafa" Margin="0 0 10 0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="{Binding DiskType}" FontSize="16" FontWeight="SemiBold"
-                                                   Foreground="#FFFC8803" Margin="0 0 10 0" VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,10">
+                                        <Icon:PackIconMaterial Kind="Harddisk" Width="20" Height="20" Foreground="#a0a0a0" Margin="0,0,8,0"/>
+                                        <TextBlock Text="Disk" FontSize="18" FontWeight="SemiBold" Foreground="#fcfafa" VerticalAlignment="Center"/>
                                     </StackPanel>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding UsedPercent, StringFormat={}{0:F0}%}" 
-                                               FontSize="22" FontWeight="Bold" Foreground="#FFFC8803" VerticalAlignment="Center" Margin="0,0,0,0"/>
-
-                                    <!-- Прогресс-бар -->
-                                    <ProgressBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                                                 Height="10" Margin="0,12,0,0"
-                                                 Minimum="0" Maximum="100"
-                                                 Value="{Binding UsedPercent}"
-                                                 Foreground="#FFFC8803"
-                                                 Background="#393b52"
-                                                 BorderThickness="0"
-                                                 Style="{StaticResource RoundedProgressBar}"/>
-
-                                    <!-- Значения Used/Free/Total -->
-                                    <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,14,0,0" HorizontalAlignment="Left">
-                                        <TextBlock Text="Used:" FontSize="14" Foreground="#888" Margin="0,0,6,0"/>
-                                        <TextBlock Text="{Binding UsedGB, StringFormat={}{0:F1} GB}" FontSize="16" FontWeight="Bold" Foreground="#fc6" Margin="0,0,16,0"/>
-                                        <TextBlock Text="Free:" FontSize="14" Foreground="#888" Margin="0,0,6,0"/>
-                                        <TextBlock Text="{Binding FreeGB, StringFormat={}{0:F1} GB}" FontSize="16" FontWeight="Bold" Foreground="#6cf" Margin="0,0,16,0"/>
-                                        <TextBlock Text="Total:" FontSize="14" Foreground="#888" Margin="0,0,6,0"/>
-                                        <TextBlock Text="{Binding TotalGB, StringFormat={}{0:F1} GB}" FontSize="16" FontWeight="Bold" Foreground="#fcfafa"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Used" FontSize="12" Foreground="#a0a0a0" Margin="0,0,0,2"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="Total GB" FontSize="12" Foreground="#a0a0a0" HorizontalAlignment="Right" Margin="0,0,0,2"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding UsedGB, StringFormat={}{0:F1} GB}" FontSize="20" FontWeight="Bold" Foreground="#fcfafa" VerticalAlignment="Bottom"/>
+                                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                                        <TextBlock Text="{Binding UsedPercent, StringFormat={}{0:F0}%}" FontSize="20" FontWeight="Bold" Foreground="#fcfafa" HorizontalAlignment="Right" Margin="0,0,0,5"/>
+                                        <ProgressBar Height="6" Minimum="0" Maximum="100" Value="{Binding UsedPercent}" Foreground="#007FFF" Background="#393b52" BorderThickness="0" Width="100" Style="{StaticResource RoundedProgressBar}"/> 
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -320,152 +200,101 @@
         </Border>
 
         <!-- RAM и Network в правой нижней ячейке -->
-        <Grid Grid.Row="1" Grid.Column="1" Margin="10">
+        <Grid Grid.Row="1" Grid.Column="1" Margin="14">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- RAM Info (верхняя часть) -->
-            <Border Style="{StaticResource mainBorder}" Grid.Row="0" Margin="0 0 0 5">
+            <!-- RAM Info -->
+            <Border Style="{StaticResource mainBorder}" Grid.Row="0" Margin="0 0 0 8" Background="#23243a" CornerRadius="16" Padding="18">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="45"/>
-                        <RowDefinition Height="25"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-
-                    <TextBlock Text="RAM" Style="{StaticResource titleText}" Margin="5 0 0 0"
-                               VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                    <ProgressBar x:Name="ramProgressBar" Grid.Column="1" Grid.ColumnSpan="3" 
-                                 Style="{DynamicResource ProgressBarStyle}"                                  
-                                 VerticalAlignment="Center" 
-                                 HorizontalAlignment="Center"
-                                 Width="90" Height="6" Minimum="0" Maximum="100"
-                                 Foreground="#FF05F4FC"/>
-                    <Grid Grid.Column="3">
+                    <Grid Grid.Row="0" Grid.ColumnSpan="2">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="50"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <Label Name="ramLabel" Grid.Column="0" 
-                               Foreground="#fcfafa" FontSize="15"
-                               FontWeight="SemiBold"
-                               VerticalContentAlignment="Center"      
-                               Padding="0"
-                               ContentStringFormat="{}{0:F1}" 
-                               HorizontalAlignment="Right" VerticalAlignment="Center" 
-                               HorizontalContentAlignment="Right"/>
-                        <TextBlock Text="%" Grid.Column="1" Foreground="#fcfafa" FontSize="15"
-                                   Margin="3 8 5 8" VerticalAlignment="Center" FontWeight="SemiBold"
-                                   HorizontalAlignment="Right"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Icon:PackIconMaterial Kind="Memory" Width="22" Height="22" Foreground="#05F4FC" Margin="0,0,8,0"/>
+                            <TextBlock Text="RAM" FontSize="20" FontWeight="Bold" Foreground="#fcfafa" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" Text="{Binding Content, ElementName=ramLabel, StringFormat={}{0:F0}%}" FontSize="20" FontWeight="Bold" Foreground="#05F4FC" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                     </Grid>
-
-                    <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="Used"
-                               FontSize="12" FontWeight="SemiBold"
-                               VerticalAlignment="Bottom" 
-                               Margin="5 0 0 0" 
-                               Foreground="#464a63"/>
-                    <TextBlock Grid.Row="1" Grid.Column="2" Text="Free"
-                               FontSize="12" FontWeight="SemiBold"
-                               VerticalAlignment="Bottom" 
-                               Margin="5 0 0 0" 
-                               Foreground="#464a63"/>
-                    <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
-                        <Label x:Name="ramUsedLabel" Foreground="#fcfafa" FontSize="14"
-                               FontWeight="SemiBold"
-                               VerticalContentAlignment="Center"      
-                               Padding="0"
-                               ContentStringFormat="{}{0:F1}" 
-                               HorizontalAlignment="Left" VerticalAlignment="Center" 
-                               HorizontalContentAlignment="Left"
-                               Margin="5 0 0 0" />
-                        
-                        <TextBlock Text="GB" Foreground="#fcfafa" FontSize="14"
-                                   VerticalAlignment="Center" FontWeight="SemiBold"
-                                   HorizontalAlignment="Right" Padding="0" Margin="5 1 0 0"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal">
-                        <Label x:Name="ramFreeLabel" Foreground="#fcfafa" FontSize="14"
-                               FontWeight="SemiBold"
-                               VerticalContentAlignment="Center"      
-                               Padding="0"
-                               ContentStringFormat="{}{0:F1}" 
-                               HorizontalAlignment="Left" VerticalAlignment="Center" 
-                               HorizontalContentAlignment="Left"
-                               Margin="5 0 0 0" />
-
-                        <TextBlock Text="GB" Foreground="#fcfafa" FontSize="14"
-                                   VerticalAlignment="Center" FontWeight="SemiBold"
-                                   HorizontalAlignment="Right" Padding="0" Margin="5 1 0 0"/>
-                    </StackPanel>
+                    <ProgressBar x:Name="ramProgressBar" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,8,0,8" Height="7" Minimum="0" Maximum="100" Value="{Binding Content, ElementName=ramLabel, Mode=OneWay}" Foreground="#05F4FC" Background="#393b52" BorderThickness="0" Style="{StaticResource RoundedProgressBar}"/>
+                    <Grid Grid.Row="2" Grid.ColumnSpan="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left">
+                            <TextBlock Text="Used" FontSize="12" Foreground="#a0a0a0" Margin="0,0,0,2"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Label x:Name="ramUsedLabel" Foreground="#fcfafa" FontSize="18" FontWeight="Bold" VerticalContentAlignment="Center" Padding="0" ContentStringFormat="{}{0:F1}" />
+                                <TextBlock Text="GB" Foreground="#fcfafa" FontSize="14" FontWeight="SemiBold" Margin="5,0,0,0" VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Right">
+                            <TextBlock Text="Free" FontSize="12" Foreground="#a0a0a0" Margin="0,0,0,2" HorizontalAlignment="Right"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Label x:Name="ramFreeLabel" Foreground="#fcfafa" FontSize="18" FontWeight="Bold" VerticalContentAlignment="Center" Padding="0" ContentStringFormat="{}{0:F1}" />
+                                <TextBlock Text="GB" Foreground="#fcfafa" FontSize="14" FontWeight="SemiBold" Margin="5,0,0,0" VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                    <Label x:Name="ramLabel" Visibility="Collapsed"/>
                 </Grid>
             </Border>
 
-            <!-- Network Info (нижняя часть) -->
-            <Border Style="{StaticResource mainBorder}" Grid.Row="1" Margin="0 5 0 0">
+            <!-- Network Info -->
+            <Border Style="{StaticResource mainBorder}" Grid.Row="1" Margin="0 8 0 0" Background="#23243a" CornerRadius="16" Padding="18">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="45"/>
-                        <RowDefinition Height="25"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-
-                    <TextBlock Text="Network" Style="{StaticResource titleText}" Margin="5 0 0 0"
-                               VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                    <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="Sent"
-                               FontSize="12" FontWeight="SemiBold"
-                               VerticalAlignment="Center" 
-                               Margin="5 0 0 0" 
-                               Foreground="#464a63"/>
-                    <TextBlock Grid.Row="1" Grid.Column="2" Text="Received"
-                               FontSize="12" FontWeight="SemiBold"
-                               VerticalAlignment="Center" 
-                               Margin="5 0 0 0" 
-                               Foreground="#464a63"/>
-
-                    <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
-                        <Label x:Name="networkSentBytesLabel" 
-                               Foreground="#fcfafa" FontSize="14"
-                               FontWeight="SemiBold"
-                               VerticalContentAlignment="Center"      
-                               Padding="0"
-                               ContentStringFormat="{}{0:F1}" 
-                               HorizontalAlignment="Left" VerticalAlignment="Center" 
-                               HorizontalContentAlignment="Left"
-                           Margin="5 0 0 0" />
-
-                        <TextBlock Text="Mb/s" Foreground="#fcfafa" FontSize="14"
-                                   VerticalAlignment="Center" FontWeight="SemiBold"
-                                   HorizontalAlignment="Right" Padding="0" Margin="5 1 0 0"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal">
-
-                        <Label x:Name="networkReceivedBytesLabel" Foreground="#fcfafa" FontSize="14"
-                               FontWeight="SemiBold"
-                               VerticalContentAlignment="Center"      
-                               Padding="0"
-                               ContentStringFormat="{}{0:F1}" 
-                               HorizontalAlignment="Left" VerticalAlignment="Center" 
-                               HorizontalContentAlignment="Left"
-                           Margin="5 0 0 0" />
-
-                        <TextBlock Text="Mb/s" Foreground="#fcfafa" FontSize="14"
-                                   VerticalAlignment="Center" FontWeight="SemiBold"
-                                   HorizontalAlignment="Right" Padding="0" Margin="5 1 0 0"/>
-                    </StackPanel>
+                    <Grid Grid.Row="0" Grid.ColumnSpan="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Icon:PackIconMaterial Kind="LanConnect" Width="22" Height="22" Foreground="#05F4FC" Margin="0,0,8,0"/>
+                            <TextBlock Text="Network" FontSize="20" FontWeight="Bold" Foreground="#fcfafa" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
+                    <Grid Grid.Row="1" Grid.ColumnSpan="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left">
+                            <TextBlock Text="Sent" FontSize="12" Foreground="#a0a0a0" Margin="0,0,0,2"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Label x:Name="networkSentBytesLabel" Foreground="#fcfafa" FontSize="18" FontWeight="Bold" VerticalContentAlignment="Center" Padding="0" ContentStringFormat="{}{0:F1}" />
+                                <TextBlock Text="Mb/s" Foreground="#fcfafa" FontSize="14" FontWeight="SemiBold" Margin="5,0,0,0" VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Right">
+                            <TextBlock Text="Received" FontSize="12" Foreground="#a0a0a0" Margin="0,0,0,2" HorizontalAlignment="Right"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Label x:Name="networkReceivedBytesLabel" Foreground="#fcfafa" FontSize="18" FontWeight="Bold" VerticalContentAlignment="Center" Padding="0" ContentStringFormat="{}{0:F1}" />
+                                <TextBlock Text="Mb/s" Foreground="#fcfafa" FontSize="14" FontWeight="SemiBold" Margin="5,0,0,0" VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </Border>
         </Grid>

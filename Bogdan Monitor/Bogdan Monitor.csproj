@@ -7,14 +7,8 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>icon.ico</ApplicationIcon>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> <!-- Добавлено -->
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Libs\**" />
-    <EmbeddedResource Remove="Libs\**" />
-    <None Remove="Libs\**" />
-    <Page Remove="Libs\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <Content Include="icon.ico" />
@@ -25,6 +19,10 @@
     <PackageReference Include="System.Management" Version="9.0.4" />
     <PackageReference Include="LiveCharts.Wpf.Core" Version="0.9.8" />
     <PackageReference Include="MahApps.Metro.IconPacks" Version="4.11.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Libs\" />
   </ItemGroup>
 
 </Project>
